@@ -1,0 +1,58 @@
+
+pipeline {
+    agent any
+
+    environment {
+        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
+        DOCKER_IMAGE = "YOUR_DOCKERHUB_USERNAME/devops_week12:latest"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Week 12 source code checked out'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t "$DOCKER_IMAGE" .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_TOKEN" |
+                            docker login -u "$DOCKER_USER" --password-stdin
+                        docker push "$DOCKER_IMAGE"
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl apply -f service.yaml'
+                sh 'kubectl rollout status deployment/week12-deployment --timeout=120s'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Week 12 CI/CD pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check Console Output.'
+        }
+    }
+}
