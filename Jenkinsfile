@@ -13,11 +13,14 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                sh 'python3 -m pytest tests/ -v'
-            }
-        }
+        
+stage('Run Tests') {
+    steps {
+        sh 'python3 -m pip install -r requirements.txt'
+        sh 'python3 -m pip install pytest selenium webdriver-manager'
+        sh 'python3 -m pytest tests/ -v'
+    }
+}
 
         stage('Build Docker Image') {
             steps {
