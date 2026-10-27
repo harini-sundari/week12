@@ -2,9 +2,10 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'harinisundari/devops_week12:latest'
-    }
+   environment {
+    PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
+    DOCKER_IMAGE = 'harinisundari/devops_week12:latest'
+}
 
     stages {
         stage('Checkout') {
