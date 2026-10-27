@@ -3,14 +3,19 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
-        DOCKER_IMAGE = "YOUR_DOCKERHUB_USERNAME/devops_week12:latest"
+        DOCKER_IMAGE = 'harinisundari/devops_week12:latest'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Week 12 source code checked out'
+                checkout scm
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'python3 -m pytest tests/ -v'
             }
         }
 
@@ -24,7 +29,7 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'dockerhub-creds',
+                        credentialsId: 'dockerhub-creds-global',
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_TOKEN'
                     )
@@ -33,6 +38,7 @@ pipeline {
                         echo "$DOCKER_TOKEN" |
                             docker login -u "$DOCKER_USER" --password-stdin
                         docker push "$DOCKER_IMAGE"
+                        docker logout
                     '''
                 }
             }
@@ -49,10 +55,10 @@ pipeline {
 
     post {
         success {
-            echo 'Week 12 CI/CD pipeline completed successfully!'
+            echo 'Week 12 pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check Console Output.'
+            echo 'Pipeline failed. Check Console Output for the error.'
         }
     }
 }

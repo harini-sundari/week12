@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: week12
-          image: YOUR_DOCKERHUB_USERNAME/devops_week12:latest
+          image: harinisundari/devops_week12:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
